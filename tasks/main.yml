@@ -1,0 +1,32 @@
+---
+# tasks file for nginx
+
+- name: Install nginx
+  apt: package=nginx state=present
+
+- name: Disable nginx default site
+  file: path=/etc/nginx/sites-enabled/default state=absent
+
+- name: Remove nginx default site config
+  file: path=/etc/nginx/sites-available/default state=absent
+
+- name: Create nginx log directory
+  file: path=/var/log/nginx state=directory
+
+- name: Create nginx includes directory
+  file: path=/etc/nginx/includes state=directory
+
+- name: Modify nginx configuration (main)
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify:
+    - reload nginx
+
+- name: Modify nginx configuration (location)
+  template: src=nginx.location.conf.j2 dest=/etc/nginx/includes/location.conf
+  notify:
+    - reload nginx
+
+- name: Create the SSL DH Params
+  copy: src=dhparams.pem
+        dest=/etc/ssl/certs/dhparams.pem
+        mode=0644
